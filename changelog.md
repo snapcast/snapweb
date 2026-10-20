@@ -1,5 +1,26 @@
 # Snapweb changelog
 
+## Version Next
+
+### Features
+
+- Add vorbis support (Issue #14, PR #162)
+
+### Bugfixes
+
+### General
+
+- Improve iOS background playback (Issue #161, PR #164))
+- Update packages
+
+### Contributors
+
+- @baschi29
+- @eshaz
+- @badaix
+
+_Johannes Pohl <snapweb@badaix.de>  ???, ?? ??? 2026 00:13:37 +0200_
+
 ## Version 0.9.3
 
 ### Bugfixes
