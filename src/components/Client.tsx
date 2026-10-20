@@ -94,14 +94,14 @@ export default function Client(props: ClientProps) {
 
   return (
     <Box sx={{ opacity: props.client.connected ? 1.0 : 0.5 }} >
-      <Grid container spacing={2} justifyContent="center" alignItems="center" >
+      <Grid container spacing={2} sx={{ justifyContent: "center", alignItems: "center" }}>
         <Grid size="grow">
           <Stack spacing={-1} direction="column">
             {/* item style={{ flexGrow: "1" }}> */}
             <Typography variant="subtitle1" align='left' gutterBottom>
               {props.client.config.name === "" ? props.client.host.name : props.client.config.name}
             </Typography>
-            <Stack spacing={2} direction="row" alignItems="center">
+            <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
               <IconButton aria-label="Mute" onClick={() => { handleMuteClicked() }}>
                 {props.client.config.volume.muted ? <VolumeOffIcon /> : <VolumeUpIcon />}
               </IconButton>

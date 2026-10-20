@@ -245,14 +245,18 @@ export default function Group(props: GroupProps) {
         flexGrow: 1
       }}>
         {/* <Stack spacing={2} direction="column" alignItems="center"> */}
-        <Stack spacing={0} direction="column" alignItems="left">
+        <Stack spacing={0} direction="column" sx={{ alignItems: "left" }}>
           <Grid
+            component="div"
             container
             direction="row"
-            justifyContent="space-between"
-            alignItems="center"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: '100%'
+            }}
           >
-            <Stack direction="row" justifyContent="center" alignItems="center" >
+            <Stack direction="row" sx={{ justifyContent: "center", alignItems: "center" }}>
               <IconButton aria-label="Options" onClick={(event) => { handleSettingsClicked(event); }}>
                 <SettingsIcon />
               </IconButton>
@@ -275,7 +279,7 @@ export default function Group(props: GroupProps) {
             </Stack>
 
             {stream?.properties.canControl &&
-              <Stack direction="row" justifyContent="center" alignItems="center" >
+              <Stack direction="row" sx={{ justifyContent: "center", alignItems: "center" }}>
                 <IconButton aria-label="previous" onClick={() => { props.snapcontrol.control(props.group.stream_id, 'previous') }}>
                   <SkipPreviousIcon />
                 </IconButton>
@@ -290,14 +294,14 @@ export default function Group(props: GroupProps) {
             }
           </Grid>
           {stream?.properties.metadata &&
-            <Stack spacing={2} direction="row" alignItems="center" >
+            <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
               <CardMedia
                 component="img"
                 sx={{ width: 48 }}
                 image={artUrl}
                 alt={title + " cover"}
               />
-              <Stack spacing={0} direction="column" justifyContent="center" sx={{ flexGrow: 1, overflow: 'hidden' }}>
+              <Stack spacing={0} direction="column" sx={{ justifyContent: "center", flexGrow: 1, overflow: 'hidden' }}>
                 <Typography noWrap variant="subtitle1" align="left">
                   {title}
                 </Typography>
@@ -308,7 +312,7 @@ export default function Group(props: GroupProps) {
             </Stack>
           }
           {groupClients.length > 1 &&
-            <Stack spacing={2} direction="row" alignItems="center">
+            <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
               <IconButton aria-label="Mute" onClick={() => { handleMuteClicked() }}>
                 {props.group.muted ? <VolumeOffIcon /> : <VolumeUpIcon />}
               </IconButton>
