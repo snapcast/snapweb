@@ -1,6 +1,6 @@
 # Snapweb changelog
 
-## Version Next
+## Version 0.10.0
 
 ### Features
 
@@ -19,7 +19,7 @@
 - @eshaz
 - @badaix
 
-_Johannes Pohl <snapweb@badaix.de>  ???, ?? ??? 2026 00:13:37 +0200_
+_Johannes Pohl <snapweb@badaix.de>  Thu 31 Dec 2026 00:13:37 +0200_
 
 ## Version 0.9.3
 
