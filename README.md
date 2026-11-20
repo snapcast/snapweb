@@ -31,6 +31,33 @@ mobile devices, with the look and feel of
 
 Prebuilt versions can be downloaded as zip archive or debian package in [Releases](https://github.com/snapcast/snapweb/releases).
 
+## Source player links
+
+The Sources tab lists Snapserver streams and their live title, artist and artwork,
+using the same metadata as the Sinks tab. Metadata requires a source that provides
+it, for example through a stream control script.
+
+Each source shows its playback status and, when supported, previous, play/pause,
+and next controls. Unsupported actions are disabled. The Sinks tab also provides
+an "Open player" link for its selected source when a player URL is configured.
+Player links open in a new tab; playback controls act directly through Snapserver.
+
+Add a URL-encoded `player_url` query parameter to a source in the `[stream]`
+section of `snapserver.conf` to link to its player interface:
+
+```ini
+source = pipe:///tmp/snap-mpd1?name=player1&controlscript=meta_mpd.py&controlscriptparams=--mpd-port%3D6601&player_url=http%3A%2F%2F192.168.1.10%3A8081%2F
+```
+
+`player_url` is a convention used by this Snapweb fork, not a built-in Snapcast
+setting. Snapserver exposes it in the stream URI through its API. Preserve all
+existing source parameters and restart Snapserver after changing its configuration;
+no Snapweb rebuild is needed. URLs must be absolute HTTP or HTTPS URLs reachable
+by the device running Snapweb; do not use `localhost` for remote devices. Sources
+without a URL display "No player URL configured"; invalid URLs display an error
+instead of a clickable link. The links are public to anyone who can access
+Snapserver, so do not include credentials. `VITE_APP_SOURCE_URLS` is no longer used.
+
 ## Setup as WebApp
 
 On Android open `http://<snapserver host>:1780` in Chrome and select in the menu

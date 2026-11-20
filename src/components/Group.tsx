@@ -1,11 +1,13 @@
 import React, { useRef } from 'react';
 import { useState, useLayoutEffect } from 'react';
 import Client from './Client';
-import logo from '../assets/logo192.png';
+import NowPlaying from './NowPlaying';
+import PlayerLink from './PlayerLink';
+import PlaybackControls from './PlaybackControls';
 import { SnapControl, Snapcast } from '../snapcontrol';
-import { Alert, Box, Button, Card, CardMedia, Checkbox, Divider, FormControl, FormControlLabel, FormGroup, Grid, MenuItem, Select, Slider, Snackbar, Stack, TextField, Typography, IconButton } from '@mui/material';
+import { Alert, Box, Button, Card, Checkbox, Divider, FormControl, FormControlLabel, FormGroup, Grid, MenuItem, Select, Slider, Snackbar, Stack, TextField, IconButton } from '@mui/material';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import { VolumeUp as VolumeUpIcon, VolumeOff as VolumeOffIcon, PlayArrow as PlayArrowIcon, Pause as PauseIcon, SkipPrevious as SkipPreviousIcon, SkipNext as SkipNextIcon, Settings as SettingsIcon } from '@mui/icons-material';
+import { VolumeUp as VolumeUpIcon, VolumeOff as VolumeOffIcon, Settings as SettingsIcon } from '@mui/icons-material';
 
 
 type GroupClient = {
@@ -177,13 +179,6 @@ export default function Group(props: GroupProps) {
     groupVolumeChange.current.volumeEntered = true;
   }
 
-  function handlePlayPauseClicked() {
-    if (props.server.getStream(props.group.stream_id)?.properties.playbackStatus === "playing")
-      props.snapcontrol.control(props.group.stream_id, 'pause');
-    else
-      props.snapcontrol.control(props.group.stream_id, 'play');
-  }
-
   function snackbar() {
     return (
       deletedClients.map(client =>
@@ -226,11 +221,6 @@ export default function Group(props: GroupProps) {
     return (<div>{snackbar()}</div>);
 
   const stream = props.server.getStream(props.group.stream_id);
-  const artUrl = stream?.properties.metadata?.artUrl || logo;
-  const title = stream?.properties.metadata?.title || "Unknown Title";
-  const artist: string = (stream?.properties.metadata?.artist) ? stream!.properties.metadata.artist.join(', ') : "Unknown Artist";
-
-  console.debug("Art URL: " + artUrl);
 
   const allClients = [];
   for (const group of props.server.groups)
@@ -278,39 +268,10 @@ export default function Group(props: GroupProps) {
               </FormControl>
             </Stack>
 
-            {stream?.properties.canControl &&
-              <Stack direction="row" sx={{ justifyContent: "center", alignItems: "center" }}>
-                <IconButton aria-label="previous" onClick={() => { props.snapcontrol.control(props.group.stream_id, 'previous') }}>
-                  <SkipPreviousIcon />
-                </IconButton>
-                <IconButton aria-label="play/pause" onClick={() => { handlePlayPauseClicked(); }}>
-                  {props.server.getStream(props.group.stream_id)?.properties.playbackStatus === "playing" ? <PauseIcon /> : <PlayArrowIcon />}
-                  {/* sx={{ height: 32, width: 32 }} /> */}
-                </IconButton>
-                <IconButton aria-label="next" onClick={() => { props.snapcontrol.control(props.group.stream_id, 'next') }}>
-                  <SkipNextIcon />
-                </IconButton>
-              </Stack>
-            }
+            {stream && <PlaybackControls stream={stream} snapcontrol={props.snapcontrol} />}
           </Grid>
-          {stream?.properties.metadata &&
-            <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
-              <CardMedia
-                component="img"
-                sx={{ width: 48 }}
-                image={artUrl}
-                alt={title + " cover"}
-              />
-              <Stack spacing={0} direction="column" sx={{ justifyContent: "center", flexGrow: 1, overflow: 'hidden' }}>
-                <Typography noWrap variant="subtitle1" align="left">
-                  {title}
-                </Typography>
-                <Typography noWrap variant="body1" align="left">
-                  {artist}
-                </Typography>
-              </Stack>
-            </Stack>
-          }
+          <PlayerLink value={stream?.uri.query.player_url} label="Open player" />
+          <NowPlaying metadata={stream?.properties.metadata} />
           {groupClients.length > 1 &&
             <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
               <IconButton aria-label="Mute" onClick={() => { handleMuteClicked() }}>

@@ -185,7 +185,7 @@ namespace Snapcast {
             host: string;
             path: string;
             fragment: string;
-            query: string;
+            query: Record<string, string>;
         }
 
         properties!: Properties;
