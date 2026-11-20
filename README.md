@@ -4,6 +4,11 @@ Web client for [Snapcast](https://github.com/snapcast/snapcast), optimized for
 mobile devices, with the look and feel of
 [Snapdroid](https://github.com/snapcast/snapdroid)
 
+This fork's Sources preview is version **0.9.4-sources.1**, shown in About
+Snapweb. Increment the preview suffix (`sources.2`, `sources.3`, etc.) for
+subsequent review builds using `npm version <version> --no-git-tag-version`.
+These preview versions are not upstream releases or PR numbers.
+
 ## Develop
 
 Use Node.js 24 or newer. Run the client-assignment regression tests with

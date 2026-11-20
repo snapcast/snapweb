@@ -1,7 +1,7 @@
 {
   "name": "snapweb",
   "private": true,
-  "version": "0.9.3",
+  "version": "0.9.4-sources.1",
   "type": "module",
   "scripts": {
     "test": "node --experimental-transform-types --test src/*.test.mjs",

@@ -1,5 +1,19 @@
 # Snapweb changelog
 
+## Version 0.9.4-sources.1 (fork preview)
+
+### Features
+
+- Add a Sources tab with now-playing information, playback controls and player links.
+- Show assigned clients and allow individual source changes with group-split warnings.
+- Support friendly source names through `display_name`.
+- Show pipe inputs when no player URL is configured.
+
+### Bugfixes
+
+- Use radio station metadata when artist information is missing.
+- Report assignment failures and preserve mute when leaving a muted group.
+
 ## Version 0.10.0
 
 ### Features
