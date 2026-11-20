@@ -71,7 +71,8 @@ setting. Snapserver exposes it in the stream URI through its API. Preserve all
 existing source parameters and restart Snapserver after changing its configuration;
 no Snapweb rebuild is needed. URLs must be absolute HTTP or HTTPS URLs reachable
 by the device running Snapweb; do not use `localhost` for remote devices. Sources
-without a URL display "No player URL configured"; invalid URLs display an error
+without a URL display their pipe address as plain text when using a pipe input,
+or "No player URL configured" for other input types; invalid URLs display an error
 instead of a clickable link. The links are public to anyone who can access
 Snapserver, so do not include credentials. `VITE_APP_SOURCE_URLS` is no longer used.
 

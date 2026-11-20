@@ -34,7 +34,11 @@ export default function Sources({ server, snapcontrol, showOffline }: { server: 
               </Stack>
               <PlaybackControls stream={stream} snapcontrol={snapcontrol} />
             </Stack>
-            <PlayerLink value={stream.uri.query.player_url} showMissing />
+            {stream.uri.query.player_url === undefined && stream.uri.scheme === 'pipe' ? (
+              <Typography color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>
+                Input: pipe://{stream.uri.path}
+              </Typography>
+            ) : <PlayerLink value={stream.uri.query.player_url} showMissing />}
             <NowPlaying metadata={stream.properties.metadata} />
             <SourceClients stream={stream} server={server} snapcontrol={snapcontrol} showOffline={showOffline} />
           </Stack>
