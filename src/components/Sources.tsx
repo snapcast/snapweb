@@ -3,6 +3,7 @@ import { Snapcast, SnapControl } from '../snapcontrol';
 import NowPlaying from './NowPlaying';
 import PlayerLink from './PlayerLink';
 import PlaybackControls from './PlaybackControls';
+import SourceClients from './SourceClients';
 
 function playbackStatus(stream: Snapcast.Stream): string {
   switch (stream.properties.playbackStatus) {
@@ -18,22 +19,24 @@ function playbackStatus(stream: Snapcast.Stream): string {
   }
 }
 
-export default function Sources({ streams, snapcontrol }: { streams: Snapcast.Stream[], snapcontrol: SnapControl }) {
+export default function Sources({ server, snapcontrol, showOffline }: { server: Snapcast.Server, snapcontrol: SnapControl, showOffline: boolean }) {
   return (
     <Box sx={{ m: 1.5 }}>
-      {streams.length === 0 && <Typography>No sources available.</Typography>}
-      {streams.map(stream => (
+      {server.streams.length === 0 && <Typography>No sources available.</Typography>}
+      {server.streams.map(stream => (
         <Card key={stream.id} sx={{ p: 2, my: 2 }}>
           <Stack spacing={1}>
             <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
               <Stack>
-                <Typography variant="h6">{stream.id}</Typography>
+                <Typography variant="h6">{stream.getName()}</Typography>
+                {stream.getName() !== stream.id && <Typography variant="caption" color="text.secondary">{stream.id}</Typography>}
                 <Typography color="text.secondary">{playbackStatus(stream)}</Typography>
               </Stack>
               <PlaybackControls stream={stream} snapcontrol={snapcontrol} />
             </Stack>
             <PlayerLink value={stream.uri.query.player_url} showMissing />
             <NowPlaying metadata={stream.properties.metadata} />
+            <SourceClients stream={stream} server={server} snapcontrol={snapcontrol} showOffline={showOffline} />
           </Stack>
         </Card>
       ))}

@@ -7,8 +7,9 @@ export default function NowPlaying({ metadata }: { metadata?: Snapcast.Metadata 
     return null;
   }
 
-  const title = metadata.title || "Unknown Title";
-  const artist = metadata.artist ? metadata.artist.join(', ') : "Unknown Artist";
+  const station = metadata.name?.trim();
+  const title = metadata.title?.trim() || station || "Unknown Title";
+  const artist = metadata.artist?.map(value => value.trim()).filter(Boolean).join(', ') || (station !== title ? station : undefined);
 
   return (
     <Stack spacing={2} direction="row" sx={{ alignItems: "center" }}>
@@ -22,9 +23,9 @@ export default function NowPlaying({ metadata }: { metadata?: Snapcast.Metadata 
         <Typography noWrap variant="subtitle1" align="left">
           {title}
         </Typography>
-        <Typography noWrap variant="body1" align="left">
+        {artist && <Typography noWrap variant="body1" align="left">
           {artist}
-        </Typography>
+        </Typography>}
       </Stack>
     </Stack>
   );

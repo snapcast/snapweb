@@ -101,6 +101,7 @@ namespace Snapcast {
 
         fromJson(json: any) {
             this.title = json.title;
+            this.name = json.name;
             this.artist = json.artist;
             this.album = json.album;
             this.artUrl = json.artUrl;
@@ -108,6 +109,7 @@ namespace Snapcast {
         }
 
         title?: string;
+        name?: string;
         artist?: string[];
         album?: string;
         artUrl?: string;
@@ -189,6 +191,10 @@ namespace Snapcast {
         }
 
         properties!: Properties;
+
+        getName(): string {
+            return this.uri.query.display_name?.trim() || this.id;
+        }
     }
 
 
@@ -253,6 +259,11 @@ namespace Snapcast {
 // interface OnStreamChange { (id: string): void };
 
 class SnapControl {
+    private pendingRequests = new Map<number, {
+        resolve: () => void;
+        reject: (_error: Error) => void;
+        timer: ReturnType<typeof setTimeout>;
+    }>();
 
     constructor() {
         this.onChange = null;
@@ -275,6 +286,7 @@ class SnapControl {
             };
             this.connection.onerror = (ev: Event) => { console.error('error:', ev); };
             this.connection.onclose = () => {
+                this.rejectPendingRequests();
                 if (this.onConnectionChanged)
                     this.onConnectionChanged(this, false, 'Connection lost, trying to reconnect.');
                 console.info('connection lost, reconnecting in 1s');
@@ -289,6 +301,7 @@ class SnapControl {
     }
 
     public disconnect() {
+        this.rejectPendingRequests();
         if (this.timer)
             clearTimeout(this.timer);
         if (this.connection) {
@@ -460,6 +473,73 @@ class SnapControl {
         this.status_req_id = this.sendRequest('Group.SetClients', { id: group_id, clients: clients });
     }
 
+    public async assignClient(clientId: string, streamId: string): Promise<void> {
+        this.getStream(streamId);
+        let group = this.getGroupFromClient(clientId);
+        if (group.stream_id === streamId)
+            return;
+
+        let detached = false;
+        let mutedForMove = false;
+        try {
+            if (group.clients.length > 1) {
+                const client = this.getClient(clientId);
+                if (group.muted && !client.config.volume.muted) {
+                    await this.request('Client.SetVolume', {
+                        id: clientId,
+                        volume: { ...client.config.volume, muted: true }
+                    });
+                    mutedForMove = true;
+                }
+                await this.request('Group.SetClients', {
+                    id: group.id,
+                    clients: group.clients.filter(client => client.id !== clientId).map(client => client.id)
+                });
+                detached = true;
+                group = this.getGroupFromClient(clientId);
+            }
+            if (group.clients.length !== 1)
+                throw new Error('Client grouping changed. Please try again.');
+            await this.request('Group.SetStream', { id: group.id, stream_id: streamId });
+            await this.request('Server.GetStatus');
+            if (this.getGroupFromClient(clientId).stream_id !== streamId)
+                throw new Error('The server did not confirm the requested source.');
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            throw new Error(message
+                + (detached ? ' The client has already left its previous group.' : '')
+                + (mutedForMove ? ' The client was muted to preserve its previous group mute.' : ''));
+        }
+    }
+
+    private request(method: string, params?: Record<string, unknown>): Promise<void> {
+        if (this.connection?.readyState !== WebSocket.OPEN)
+            return Promise.reject(new Error('Snapserver is not connected.'));
+        return new Promise((resolve, reject) => {
+            const id = this.msg_id + 1;
+            const timer = setTimeout(() => {
+                this.pendingRequests.delete(id);
+                reject(new Error('Snapserver did not respond. Check the current grouping before retrying.'));
+            }, 10000);
+            this.pendingRequests.set(id, { resolve, reject, timer });
+            try {
+                this.sendRequest(method, params);
+            } catch (error) {
+                clearTimeout(timer);
+                this.pendingRequests.delete(id);
+                reject(error);
+            }
+        });
+    }
+
+    private rejectPendingRequests() {
+        for (const request of this.pendingRequests.values()) {
+            clearTimeout(request.timer);
+            request.reject(new Error('Snapserver disconnected. Check the current grouping before retrying.'));
+        }
+        this.pendingRequests.clear();
+    }
+
     public muteGroup(group_id: string, mute: boolean) {
         this.getGroup(group_id).muted = mute;
         this.sendRequest('Group.SetMute', { id: group_id, mute: mute });
@@ -494,7 +574,20 @@ class SnapControl {
         const is_response: boolean = (json_msg.id !== undefined);
         // console.debug("Received " + (is_response ? "response" : "notification") + ", json: " + JSON.stringify(json_msg))
         if (is_response) {
-            if (json_msg.id === this.status_req_id) {
+            const pending = this.pendingRequests.get(json_msg.id);
+            if (pending) {
+                clearTimeout(pending.timer);
+                this.pendingRequests.delete(json_msg.id);
+                if (json_msg.error) {
+                    pending.reject(new Error(json_msg.error.message || 'Snapserver rejected the request.'));
+                } else {
+                    if (json_msg.result?.server) {
+                        this.server = new Snapcast.Server(json_msg.result.server);
+                        refresh = true;
+                    }
+                    pending.resolve();
+                }
+            } else if (json_msg.id === this.status_req_id) {
                 this.server = new Snapcast.Server(json_msg.result.server);
                 refresh = true;
             }

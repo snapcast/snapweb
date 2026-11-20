@@ -263,7 +263,7 @@ export default function Group(props: GroupProps) {
                     props.snapcontrol.setStream(props.group.id, stream);
                   }}
                 >
-                  {props.server.streams.map(stream => <MenuItem key={stream.id} value={stream.id}>{stream.id}</MenuItem>)}
+                  {props.server.streams.map(stream => <MenuItem key={stream.id} value={stream.id}>{stream.getName()}</MenuItem>)}
                 </Select>
               </FormControl>
             </Stack>
@@ -302,7 +302,7 @@ export default function Group(props: GroupProps) {
             value={streamId}
             onChange={(event) => { console.log('SetStream: ' + event.target.value); setStreamId(event.target.value) }}
           >
-            {props.server.streams.map(stream => <MenuItem key={stream.id} value={stream.id}>{stream.id}</MenuItem>)}
+            {props.server.streams.map(stream => <MenuItem key={stream.id} value={stream.id}>{stream.getName()}</MenuItem>)}
           </TextField>
           <Divider textAlign="left">Clients</Divider>
           <FormGroup>

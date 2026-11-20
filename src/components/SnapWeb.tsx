@@ -396,7 +396,7 @@ export default function SnapWeb() {
           <Server server={server} snapcontrol={snapControlRef.current} showOffline={showOffline} />
         </div>
         <div role="tabpanel" id="sources-panel" aria-labelledby="sources-tab" hidden={tab !== 1}>
-          <Sources streams={server.streams} snapcontrol={snapControlRef.current} />
+          <Sources server={server} snapcontrol={snapControlRef.current} showOffline={showOffline} />
         </div>
         {snackbar()}
         <AboutDialog open={aboutOpen} onClose={() => { setAboutOpen(false); }} />

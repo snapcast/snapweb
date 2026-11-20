@@ -6,6 +6,9 @@ mobile devices, with the look and feel of
 
 ## Develop
 
+Use Node.js 24 or newer. Run the client-assignment regression tests with
+`npm test` (Node's experimental TypeScript transformation is used).
+
 1. Add your snapserver host as a local environment var
     ```bash
     echo 'VITE_APP_SNAPSERVER_HOST = localhost:1780' > .env.local
@@ -41,6 +44,20 @@ Each source shows its playback status and, when supported, previous, play/pause,
 and next controls. Unsupported actions are disabled. The Sinks tab also provides
 an "Open player" link for its selected source when a player URL is configured.
 Player links open in a new tab; playback controls act directly through Snapserver.
+
+Sources also list their assigned clients, marking muted and (when "Show offline
+clients" is enabled) disconnected clients. "Assign client" moves one client to
+that source. If it belongs to a multi-client group, the dialog warns before
+detaching it; the other clients keep their source. When leaving a muted group,
+the moved client stays muted (using its individual mute setting). A failed or interrupted
+assignment displays an error. Because detaching and changing the source are
+separate server operations, check grouping before retrying a failed assignment.
+
+Radio metadata uses the station name when artist information is missing.
+To give a source a friendly label, append a URL-encoded `display_name` parameter,
+for example `&display_name=Music%201`. It appears in both tabs and source
+selectors; the stream ID (`name`) remains unchanged. As with `player_url`, this
+is a convention of this fork and requires a Snapserver restart, not a rebuild.
 
 Add a URL-encoded `player_url` query parameter to a source in the `[stream]`
 section of `snapserver.conf` to link to its player interface:
