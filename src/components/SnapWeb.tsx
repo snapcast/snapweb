@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import Server from './Server';
+import Sources from './Sources';
 import AboutDialog from './AboutDialog';
 import SettingsDialog from './Settings';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Theme, config } from "../config";
 import { SnapControl, Snapcast } from '../snapcontrol';
 import { SnapStream } from '../snapstream';
-import { AppBar, Box, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, IconButton, Snackbar, Alert, Button } from '@mui/material';
+import { AppBar, Box, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography, IconButton, Snackbar, Alert, Button, Tab, Tabs } from '@mui/material';
 import { PlayArrow as PlayArrowIcon, Stop as StopIcon, Menu as MenuIcon } from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -100,6 +101,8 @@ export default function SnapWeb() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isConnected, setConnected] = useState(false);
   const [connectError, setConnectError] = useState("");
+  const [assignmentError, setAssignmentError] = useState("");
+  const [tab, setTab] = useState(0);
   const snapstreamRef = useRef<SnapStream | null>(null);
   const audioRef = useRef(new Audio());
   const snapControlRef = useRef(new SnapControl());
@@ -378,6 +381,10 @@ export default function SnapWeb() {
                 {isPlaying ? <StopIcon fontSize="large" /> : <PlayArrowIcon fontSize="large" />}
               </IconButton> : <IconButton></IconButton>}
           </Toolbar>
+          <Tabs value={tab} onChange={(_, value: number) => setTab(value)} textColor="inherit" indicatorColor="secondary" variant="fullWidth" aria-label="Snapcast views">
+            <Tab label="Sinks" id="sinks-tab" aria-controls="sinks-panel" />
+            <Tab label="Sources" id="sources-tab" aria-controls="sources-panel" />
+          </Tabs>
         </AppBar>
         <Drawer
           anchor="top"
@@ -386,8 +393,17 @@ export default function SnapWeb() {
         >
           {list()}
         </Drawer>
-        <Server server={server} snapcontrol={snapControlRef.current} showOffline={showOffline} />
+        <div role="tabpanel" id="sinks-panel" aria-labelledby="sinks-tab" hidden={tab !== 0}>
+          <Server server={server} snapcontrol={snapControlRef.current} showOffline={showOffline} />
+        </div>
+        <div role="tabpanel" id="sources-panel" aria-labelledby="sources-tab" hidden={tab !== 1}>
+          <Sources server={server} snapcontrol={snapControlRef.current} showOffline={showOffline}
+            onAssignmentError={setAssignmentError} />
+        </div>
         {snackbar()}
+        <Snackbar open={Boolean(assignmentError)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+          <Alert severity="error" onClose={() => setAssignmentError('')}>{assignmentError}</Alert>
+        </Snackbar>
         <AboutDialog open={aboutOpen} onClose={() => { setAboutOpen(false); }} />
         <SettingsDialog open={settingsOpen} onClose={(apply: boolean) => {
           console.log("Apply: " + apply + ", Serrver url: " + config.baseUrl);
