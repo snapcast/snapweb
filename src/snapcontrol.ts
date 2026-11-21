@@ -483,6 +483,10 @@ class SnapControl {
         let mutedForMove = false;
         try {
             if (group.clients.length > 1) {
+                const groupId = group.id;
+                const streamIdBeforeMove = group.stream_id;
+                const groupMuted = group.muted;
+                const clientIds = group.clients.map(client => client.id);
                 const client = this.getClient(clientId);
                 if (group.muted && !client.config.volume.muted) {
                     await this.request('Client.SetVolume', {
@@ -491,9 +495,16 @@ class SnapControl {
                     });
                     mutedForMove = true;
                 }
+                const currentGroup = this.server.groups.find(candidate =>
+                    candidate.clients.some(member => member.id === clientId));
+                if (!currentGroup || currentGroup.id !== groupId ||
+                    currentGroup.stream_id !== streamIdBeforeMove || currentGroup.muted !== groupMuted ||
+                    currentGroup.clients.length !== clientIds.length ||
+                    currentGroup.clients.some(member => !clientIds.includes(member.id)))
+                    throw new Error('Client grouping changed. Please check the current grouping before retrying.');
                 await this.request('Group.SetClients', {
-                    id: group.id,
-                    clients: group.clients.filter(client => client.id !== clientId).map(client => client.id)
+                    id: groupId,
+                    clients: clientIds.filter(id => id !== clientId)
                 });
                 detached = true;
                 group = this.getGroupFromClient(clientId);

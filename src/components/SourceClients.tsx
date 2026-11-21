@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Snapcast, SnapControl } from '../snapcontrol';
 
-export default function SourceClients({ stream, server, snapcontrol, showOffline }: {
+export default function SourceClients({ stream, server, snapcontrol, showOffline, onAssignmentError }: {
   stream: Snapcast.Stream;
   server: Snapcast.Server;
   snapcontrol: SnapControl;
   showOffline: boolean;
+  onAssignmentError: (_message: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [clientId, setClientId] = useState('');
@@ -33,7 +34,9 @@ export default function SourceClients({ stream, server, snapcontrol, showOffline
       setOpen(false);
       setClientId('');
     } catch (error) {
-      setError(error instanceof Error ? error.message : String(error));
+      const message = error instanceof Error ? error.message : String(error);
+      setError(message);
+      onAssignmentError(message);
     } finally {
       setBusy(false);
     }

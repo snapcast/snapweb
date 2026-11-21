@@ -19,7 +19,9 @@ function playbackStatus(stream: Snapcast.Stream): string {
   }
 }
 
-export default function Sources({ server, snapcontrol, showOffline }: { server: Snapcast.Server, snapcontrol: SnapControl, showOffline: boolean }) {
+export default function Sources({ server, snapcontrol, showOffline, onAssignmentError }: {
+  server: Snapcast.Server, snapcontrol: SnapControl, showOffline: boolean, onAssignmentError: (_message: string) => void
+}) {
   return (
     <Box sx={{ m: 1.5 }}>
       {server.streams.length === 0 && <Typography>No sources available.</Typography>}
@@ -40,7 +42,8 @@ export default function Sources({ server, snapcontrol, showOffline }: { server: 
               </Typography>
             ) : <PlayerLink value={stream.uri.query.player_url} showMissing />}
             <NowPlaying metadata={stream.properties.metadata} />
-            <SourceClients stream={stream} server={server} snapcontrol={snapcontrol} showOffline={showOffline} />
+            <SourceClients stream={stream} server={server} snapcontrol={snapcontrol} showOffline={showOffline}
+              onAssignmentError={onAssignmentError} />
           </Stack>
         </Card>
       ))}

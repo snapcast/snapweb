@@ -101,6 +101,7 @@ export default function SnapWeb() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isConnected, setConnected] = useState(false);
   const [connectError, setConnectError] = useState("");
+  const [assignmentError, setAssignmentError] = useState("");
   const [tab, setTab] = useState(0);
   const snapstreamRef = useRef<SnapStream | null>(null);
   const audioRef = useRef(new Audio());
@@ -396,9 +397,13 @@ export default function SnapWeb() {
           <Server server={server} snapcontrol={snapControlRef.current} showOffline={showOffline} />
         </div>
         <div role="tabpanel" id="sources-panel" aria-labelledby="sources-tab" hidden={tab !== 1}>
-          <Sources server={server} snapcontrol={snapControlRef.current} showOffline={showOffline} />
+          <Sources server={server} snapcontrol={snapControlRef.current} showOffline={showOffline}
+            onAssignmentError={setAssignmentError} />
         </div>
         {snackbar()}
+        <Snackbar open={Boolean(assignmentError)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+          <Alert severity="error" onClose={() => setAssignmentError('')}>{assignmentError}</Alert>
+        </Snackbar>
         <AboutDialog open={aboutOpen} onClose={() => { setAboutOpen(false); }} />
         <SettingsDialog open={settingsOpen} onClose={(apply: boolean) => {
           console.log("Apply: " + apply + ", Serrver url: " + config.baseUrl);

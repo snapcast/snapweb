@@ -110,11 +110,41 @@ test('preserves mute before detaching from a muted group', async t => {
     assert.equal(control.server.getClient('a').config.volume.muted, true);
 });
 
+for (const [description, changedGroups] of [
+    ['membership changes', [group('one', ['a', 'c'], 'old', true), group('other', ['b'])]],
+    ['the client moves to another group', [group('other', ['a', 'b'], 'old', true)]],
+    ['the group source changes', [group('one', ['a', 'b'], 'new', true)]],
+    ['the group is unmuted', [group('one', ['a', 'b'], 'old', false)]],
+    ['the client disappears', [group('one', ['b'], 'old', true)]]
+]) {
+    test(`does not detach if ${description} while muting`, async t => {
+        const { control, sent } = setup(t, [group('one', ['a', 'b'], 'old', true)], () => {
+            control.server.fromJson(status(changedGroups));
+            return { result: {} };
+        });
+        await assert.rejects(control.assignClient('a', 'new'),
+            /grouping changed.*client was muted/);
+        assert.deepEqual(sent.map(request => request.method), ['Client.SetVolume']);
+    });
+}
+
 test('rejects on disconnect instead of hanging', async t => {
     const { control } = setup(t, [group('one', ['a'])]);
     const assignment = control.assignClient('a', 'new');
     control.disconnect();
     await assert.rejects(assignment, /disconnected/);
+});
+
+test('reports confirmed mute and detachment if the connection is lost during the source switch', async t => {
+    const { control } = setup(t, [group('one', ['a', 'b'], 'old', true)], request => {
+        if (request.method === 'Group.SetClients')
+            return { result: { server: status([group('one', ['b'], 'old', true), group('two', ['a'])]) } };
+        if (request.method === 'Group.SetStream')
+            control.disconnect();
+        return { result: {} };
+    });
+    await assert.rejects(control.assignClient('a', 'new'),
+        /disconnected.*already left its previous group.*client was muted/);
 });
 
 test('rejects a timed-out request and ignores its late response', async t => {
