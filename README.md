@@ -176,6 +176,11 @@ The Sinks and Sources views in dark mode, shown with example data.
 
 ## Contributing
 
+CI runs the tests, production dependency audit and build. Repository-wide lint
+is currently non-blocking because of existing violations; CI reports them as
+a warning until they are addressed. A separate CodeQL workflow scans
+JavaScript and TypeScript.
+
 Since my time and my web development skills are limited, pull requests are
 highly appreciated. Please check the list of
 [open issues](https://github.com/snapcast/snapweb/issues).\

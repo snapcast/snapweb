@@ -110,6 +110,30 @@ test('preserves mute before detaching from a muted group', async t => {
     assert.equal(control.server.getClient('a').config.volume.muted, true);
 });
 
+test('updates the current client and notifies the UI when detaching fails after muting', async t => {
+    const { control, sent } = setup(t, [group('one', ['a', 'b'], 'old', true)], request => {
+        if (request.method === 'Client.SetVolume') {
+            control.server = new Snapcast.Server(status([group('one', ['a', 'b'], 'old', true)]));
+            return { result: { volume: { muted: true, percent: 30 } } };
+        }
+        return { error: { message: 'Cannot detach' } };
+    });
+    const updates = [];
+    control.onChange = (_control, server) => updates.push(server.getClient('a').config.volume.muted);
+    await assert.rejects(control.assignClient('a', 'new'), /Cannot detach.*client was muted/);
+    assert.equal(control.getClient('a').config.volume.muted, true);
+    assert.deepEqual(updates, [true]);
+    control.setVolume('a', 30, !control.getClient('a').config.volume.muted);
+    assert.deepEqual(sent[2].params.volume, { muted: false, percent: 30 });
+});
+
+test('does not update cached mute state when muting is rejected', async t => {
+    const { control } = setup(t, [group('one', ['a', 'b'], 'old', true)],
+        () => ({ error: { message: 'Cannot mute' } }));
+    await assert.rejects(control.assignClient('a', 'new'), /Cannot mute/);
+    assert.equal(control.getClient('a').config.volume.muted, false);
+});
+
 for (const [description, changedGroups] of [
     ['membership changes', [group('one', ['a', 'c'], 'old', true), group('other', ['b'])]],
     ['the client moves to another group', [group('other', ['a', 'b'], 'old', true)]],

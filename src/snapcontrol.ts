@@ -494,6 +494,12 @@ class SnapControl {
                         volume: { ...client.config.volume, muted: true }
                     });
                     mutedForMove = true;
+                    const currentClient = this.server.getClient(clientId);
+                    if (currentClient) {
+                        currentClient.config.volume.muted = true;
+                        if (this.onChange)
+                            this.onChange(this, this.server);
+                    }
                 }
                 const currentGroup = this.server.groups.find(candidate =>
                     candidate.clients.some(member => member.id === clientId));
