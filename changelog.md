@@ -1,6 +1,6 @@
 # Snapweb changelog
 
-## Version 0.9.4-sources.1 (fork preview)
+## Version 0.9.4-sources.1
 
 ### Features
 
@@ -13,6 +13,8 @@
 
 - Use radio station metadata when artist information is missing.
 - Report assignment failures and preserve mute when leaving a muted group.
+
+_acfischer42 <git@fischernet.net>  Fri, 20 Nov 2026 19:28:45 +0100_
 
 ## Version 0.10.0
 
@@ -33,7 +35,7 @@
 - @eshaz
 - @badaix
 
-_Johannes Pohl <snapweb@badaix.de>  Thu 31 Dec 2026 00:13:37 +0200_
+_Johannes Pohl <snapweb@badaix.de>  Thu, 31 Dec 2026 00:13:37 +0200_
 
 ## Version 0.9.3
 
